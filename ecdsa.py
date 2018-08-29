@@ -62,12 +62,12 @@ class ECDSAPublicKey:
         hash_fct = self.params.hash_fct
         g = self.params.generator
         order = self.params.order
-        y_inv = invMod(sign.y, order)
+        y_inv = invMod(sign.s, order)
         v1 = (int(hash_fct(m).hexdigest(), 16) * y_inv) % order
-        v2 = (sign.x * y_inv) % order
+        v2 = (sign.r * y_inv) % order
         p =  v1 * g + v2 * self.p
 
-        return sign.x % order == p.x % order
+        return sign.r % order == p.r % order
 
 class ECDSASignature:
     """
@@ -76,14 +76,14 @@ class ECDSASignature:
           params: the public parameters associed to the signature
           (x,y): the signature
     """
-    def __init__(self, params, x, y):
-        self.x = x
-        self.y = y
+    def __init__(self, params, r, s):
+        self.r = r
+        self.s = s
         self.params = params
 
     def __repr__(self):
         """ String representation of a signature """
-        return "(%d, %d)" % (self.x, self.y)
+        return "(%d, %d)" % (self.r, self.s)
 
 class ECDSAParams:
     """

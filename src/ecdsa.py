@@ -67,7 +67,7 @@ class ECDSAPublicKey:
         v2 = (sign.r * y_inv) % order
         p =  v1 * g + v2 * self.p
 
-        return sign.r % order == p.r % order
+        return sign.r % order == p.x % order
 
 class ECDSASignature:
     """

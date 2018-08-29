@@ -1,5 +1,6 @@
 import re
 import sys
+import binascii
 
 sys.path.insert(0, './src/')
 
@@ -55,7 +56,8 @@ if __name__ == '__main__':
                                 assert public.p.x == int(params['Qx'], 16)
                                 assert public.p.y == int(params['Qy'], 16)
 
-                                s = private.sign(bytes.fromhex(params['Msg']), int(params['k'], 16))
+                                m = binascii.unhexlify(params['Msg'])
+                                s = private.sign(m, int(params['k'], 16))
 
                                 assert s.r == int(params['R'], 16)
                                 assert s.s == int(params['S'], 16)

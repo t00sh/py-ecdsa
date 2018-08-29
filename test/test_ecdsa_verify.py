@@ -1,5 +1,6 @@
 import re
 import sys
+import binascii
 
 sys.path.insert(0, './src/')
 
@@ -54,7 +55,7 @@ if __name__ == '__main__':
 
                                 r = int(params['R'], 16)
                                 s = int(params['S'], 16)
-                                m = bytes.fromhex(params['Msg'])
+                                m = binascii.unhexlify(params['Msg'])
                                 sig = ECDSASignature(curve, r, s)
 
                                 result = params['Result'][0] == 'P'

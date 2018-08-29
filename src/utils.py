@@ -3,13 +3,14 @@ Utilities functions for modular arithmetic, generating random integers...
 """
 
 from random import randint
+import binascii
 import os
 
 def randomInteger(numBytes):
     """ Generate a cryptographic secure integer, 0 <= r < 2**8*numBytes """
     assert numBytes > 0
     r = os.urandom(numBytes)
-    return int(r.hex(), 16)
+    return int(binascii.hexlify(r), 16)
 
 def randomIntegerUnbias(n):
     """ Return an integer between 1 and n-1 without any potential biais"""

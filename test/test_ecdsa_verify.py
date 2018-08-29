@@ -5,8 +5,8 @@ sys.path.insert(0, './src/')
 
 from ecdsa import *
 
-# FIPS 186-4 tests vectors for signature generation
-TEST_FILE = "test/SigGen.txt"
+# FIPS 186-4 tests vectors for signature verification
+TEST_FILE = "test/SigVer.rsp"
 
 
 if __name__ == '__main__':
@@ -34,11 +34,11 @@ if __name__ == '__main__':
                     params['Curve'] = m.group(1)
                     params['Hash'] = str(m.group(2))
 
-                m = re.search('^(\S+) = (\S+)$', line)
+                m = re.search('^(\S+) = (\S+)', line)
                 if m is not None:
                     params[m.group(1)] = m.group(2)
 
-                    if m.group(1) == 'S':
+                    if m.group(1) == 'Result':
                         if params['Curve'] in curves:
                             if params['Hash'] in hashs:
                                 curve = curves[params['Curve']]
@@ -49,15 +49,15 @@ if __name__ == '__main__':
 
                                 (public, private) = curve.genKeys()
 
-                                private.d = int(params['d'], 16)
-                                public.p = private.d * public.params.generator
+                                public.p.x = int(params['Qx'], 16)
+                                public.p.y = int(params['Qy'], 16)
 
-                                assert public.p.x == int(params['Qx'], 16)
-                                assert public.p.y == int(params['Qy'], 16)
+                                r = int(params['R'], 16)
+                                s = int(params['S'], 16)
+                                m = bytes.fromhex(params['Msg'])
+                                sig = ECDSASignature(curve, r, s)
 
-                                s = private.sign(bytes.fromhex(params['Msg']), int(params['k'], 16))
-
-                                assert s.r == int(params['R'], 16)
-                                assert s.s == int(params['S'], 16)
+                                result = params['Result'][0] == 'P'
+                                assert public.verify(sig, m) == result
 
                                 sys.stdout.write("OK\n")

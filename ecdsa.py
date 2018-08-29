@@ -1,6 +1,6 @@
 from ecc import ECC, ECCPoint, ECCInfinitePoint
 from utils import isPrime, randomIntegerUnbias, invMod
-from hashlib import sha256
+import hashlib
 
 class ECDSAPrivateKey:
     """
@@ -20,20 +20,21 @@ class ECDSAPrivateKey:
 
     def sign(self, m, nonce=None):
         """ Sign a message using ECDSA algorithm """
+        hash_fct = self.params.hash_fct
         (x, y) = (0, 0)
 
         while x == 0 or y == 0:
-            if nonce == None:
+            if nonce is not None:
                 k = nonce
             else:
                 k = randomIntegerUnbias(self.params.order)
             k_inv = invMod(k, self.params.order)
             p = k * self.params.generator
             x = p.x % self.params.order
-            y = k_inv * (int(sha256(m).hexdigest(), 16) + self.d * x)
+            y = k_inv * (int(hash_fct(m).hexdigest(), 16) + self.d * x)
             y %= self.params.order
 
-        return ECDSASignature(self.params, x, y, k)
+        return ECDSASignature(self.params, x, y)
 
 class ECDSAPublicKey:
     """
@@ -58,10 +59,11 @@ class ECDSAPublicKey:
     def verify(self, sign, m):
         """ Verify an ECDSA signature """
 
+        hash_fct = self.params.hash_fct
         g = self.params.generator
         order = self.params.order
         y_inv = invMod(sign.y, order)
-        v1 = (int(sha256(m).hexdigest(), 16) * y_inv) % order
+        v1 = (int(hash_fct(m).hexdigest(), 16) * y_inv) % order
         v2 = (sign.x * y_inv) % order
         p =  v1 * g + v2 * self.p
 
@@ -90,8 +92,9 @@ class ECDSAParams:
           curve: the ECC curve to use
           generator: the ECCPoint used as generator
           order: the order of the generator, i.e order * generator = 0
+          h: the hash function used for signature
     """
-    def __init__(self, curve, generator, order):
+    def __init__(self, curve, generator, order, h=hashlib.sha256):
         assert isinstance(curve, ECC)
         assert isinstance(generator, ECCPoint)
 
@@ -110,7 +113,7 @@ class ECDSAParams:
         self.curve = curve
         self.order = order
         self.generator = generator
-
+        self.hash_fct = h
 
     def genKeys(self):
         """ Generate public and private key pairs """
@@ -141,10 +144,10 @@ class ECDSAParamsP521(ECDSAParams):
              '662c97ee72995ef42640c550b9013fad0761353c7086a272c24088be94769fd' \
              '16650', 16)
 
-    def __init__(self):
+    def __init__(self, h=hashlib.sha256):
         curve = ECC(self.__class__.a, self.__class__.b, self.__class__.p)
         g = curve.newPoint(self.__class__.gx, self.__class__.gy)
-        ECDSAParams.__init__(self, curve, g, self.__class__.order)
+        ECDSAParams.__init__(self, curve, g, self.__class__.order, h)
 
 if __name__ == '__main__':
     p521 = ECDSAParamsP521()

@@ -1,4 +1,9 @@
 Python implementation of ECDSA signature scheme.
+
+------------
+
+WARNING : this library should not be use in a production system.
+
 ------------
 
 Example :

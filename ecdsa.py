@@ -18,13 +18,16 @@ class ECDSAPrivateKey:
         self.params = params
         self.d = d
 
-    def sign(self, m):
+    def sign(self, m, nonce=None):
         """ Sign a message using ECDSA algorithm """
-        k = randomIntegerUnbias(self.params.order)
-        k_inv = invMod(k, self.params.order)
         (x, y) = (0, 0)
 
         while x == 0 or y == 0:
+            if nonce == None:
+                k = nonce
+            else:
+                k = randomIntegerUnbias(self.params.order)
+            k_inv = invMod(k, self.params.order)
             p = k * self.params.generator
             x = p.x % self.params.order
             y = k_inv * (int(sha256(m).hexdigest(), 16) + self.d * x)
@@ -71,10 +74,9 @@ class ECDSASignature:
           params: the public parameters associed to the signature
           (x,y): the signature
     """
-    def __init__(self, params, x, y, nonce):
+    def __init__(self, params, x, y):
         self.x = x
         self.y = y
-        self.nonce = nonce
         self.params = params
 
     def __repr__(self):

@@ -1,5 +1,5 @@
 from ecc import ECC, ECCPoint, ECCInfinitePoint
-from utils import isPrime, randomIntegerUnbias, invMod
+from utils import *
 import hashlib
 
 class ECDSAPrivateKey:
@@ -31,7 +31,9 @@ class ECDSAPrivateKey:
             k_inv = invMod(k, self.params.order)
             p = k * self.params.generator
             x = p.x % self.params.order
-            y = k_inv * (int(hash_fct(m).hexdigest(), 16) + self.d * x)
+            h = hashMessage(hash_fct, m, self.params.order)
+
+            y = k_inv * ((h + self.d * x) % self.params.order)
             y %= self.params.order
 
         return ECDSASignature(self.params, x, y)
@@ -63,7 +65,8 @@ class ECDSAPublicKey:
         g = self.params.generator
         order = self.params.order
         y_inv = invMod(sign.s, order)
-        v1 = (int(hash_fct(m).hexdigest(), 16) * y_inv) % order
+        h = hashMessage(hash_fct, m, order)
+        v1 = (h * y_inv) % order
         v2 = (sign.r * y_inv) % order
         p =  v1 * g + v2 * self.p
 

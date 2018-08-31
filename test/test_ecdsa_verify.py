@@ -15,11 +15,16 @@ if __name__ == '__main__':
     hashs = {}
     curves = {}
 
+    hashs['SHA-1'] = hashlib.sha1
     hashs['SHA-224'] = hashlib.sha224
     hashs['SHA-256'] = hashlib.sha256
     hashs['SHA-384'] = hashlib.sha384
     hashs['SHA-512'] = hashlib.sha512
 
+    curves['P-192'] = ECDSAParamsP192()
+    curves['P-224'] = ECDSAParamsP224()
+    curves['P-256'] = ECDSAParamsP256()
+    curves['P-384'] = ECDSAParamsP384()
     curves['P-521'] = ECDSAParamsP521()
 
     line_num = 0

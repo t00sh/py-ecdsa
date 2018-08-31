@@ -6,6 +6,19 @@ from random import randint
 import binascii
 import os
 
+
+def hashMessage(hash_fct, m, n):
+    """ FIPS-186-4 hashing, handle case when log2(h) > log2(n) """
+
+    h = hash_fct(m).digest()
+    h_length = len(h) * 8
+    n_length = n.bit_length()
+    h = int(binascii.hexlify(h), 16)
+    if n_length < h_length:
+        h >>= h_length - n_length
+
+    return h
+
 def randomInteger(numBytes):
     """ Generate a cryptographic secure integer, 0 <= r < 2**8*numBytes """
     assert numBytes > 0

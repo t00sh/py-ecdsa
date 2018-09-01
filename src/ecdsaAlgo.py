@@ -18,23 +18,24 @@ class ECDSAPrivateKey:
         self.params = params
         self.d = d
 
-    def sign(self, m, nonce=None):
+    def sign(self, m, k=None):
         """ Sign a message using ECDSA algorithm """
-        hash_fct = self.params.hash_fct
+        hash_fct = self.params.hashFunc
+        order = self.params.order
+        generator = self.params.generator
+
         (x, y) = (0, 0)
 
         while x == 0 or y == 0:
-            if nonce is not None:
-                k = nonce
-            else:
-                k = randomIntegerUnbias(self.params.order)
-            k_inv = invMod(k, self.params.order)
-            p = k * self.params.generator
-            x = p.x % self.params.order
-            h = hashMessage(hash_fct, m, self.params.order)
+            if k is None:
+                k = randomIntegerUnbias(order)
+            k_inv = invMod(k, order)
+            p = k * generator
+            x = p.x % order
+            h = hashMessage(hash_fct, m, order)
 
-            y = k_inv * ((h + self.d * x) % self.params.order)
-            y %= self.params.order
+            y = k_inv * ((h + self.d * x) % order)
+            y %= order
 
         return ECDSASignature(self.params, x, y)
 
@@ -55,15 +56,24 @@ class ECDSAPublicKey:
         if p.isInfinity():
             raise Exception("Invalid public point !")
 
-        self.params = params
-        self.p = p
+        self.__params = params
+        self.__p = p
+
+    @property
+    def params(self):
+        return self.__params
+
+    @property
+    def p(self):
+        return self.__p
 
     def verify(self, sign, m):
         """ Verify an ECDSA signature """
 
-        hash_fct = self.params.hash_fct
+        hash_fct = self.params.hashFunc
         g = self.params.generator
         order = self.params.order
+
         y_inv = invMod(sign.s, order)
         h = hashMessage(hash_fct, m, order)
         v1 = (h * y_inv) % order
@@ -113,10 +123,26 @@ class ECDSAParams:
         if (order * generator) != curve.newInfinitePoint():
             raise Exception("Bad order for the generator !")
 
-        self.curve = curve
-        self.order = order
-        self.generator = generator
-        self.hash_fct = h
+        self.__curve = curve
+        self.__order = order
+        self.__generator = generator
+        self.__hash_fct = h
+
+    @property
+    def curve(self):
+        return self.__curve
+
+    @property
+    def order(self):
+        return self.__order
+
+    @property
+    def generator(self):
+        return self.__generator
+
+    @property
+    def hashFunc(self):
+        return self.__hash_fct
 
     def genKeys(self):
         """ Generate public and private key pairs """

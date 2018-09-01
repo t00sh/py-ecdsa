@@ -21,11 +21,11 @@ if __name__ == '__main__':
     hashs['SHA-384'] = hashlib.sha384
     hashs['SHA-512'] = hashlib.sha512
 
-    curves['P-192'] = ECDSAParamsP192()
-    curves['P-224'] = ECDSAParamsP224()
-    curves['P-256'] = ECDSAParamsP256()
-    curves['P-384'] = ECDSAParamsP384()
-    curves['P-521'] = ECDSAParamsP521()
+    curves['P-192'] = ECDSAParamsP192
+    curves['P-224'] = ECDSAParamsP224
+    curves['P-256'] = ECDSAParamsP256
+    curves['P-384'] = ECDSAParamsP384
+    curves['P-521'] = ECDSAParamsP521
 
     line_num = 0
 
@@ -47,16 +47,17 @@ if __name__ == '__main__':
                     if m.group(1) == 'S':
                         if params['Curve'] in curves:
                             if params['Hash'] in hashs:
-                                curve = curves[params['Curve']]
-                                curve.hash_fct = hashs[params['Hash']]
+
+                                hash_fct = hashs[params['Hash']]
+                                curve = curves[params['Curve']](hash_fct)
 
                                 sys.stdout.write("Testing %s - %s (line %d)..." % (params['Curve'], params['Hash'], line_num))
                                 sys.stdout.flush()
 
-                                (public, private) = curve.genKeys()
-
-                                private.d = int(params['d'], 16)
-                                public.p = private.d * public.params.generator
+                                d = int(params['d'], 16)
+                                gen = curve.generator
+                                private = ECDSAPrivateKey(curve, d)
+                                public = ECDSAPublicKey(curve, d * gen)
 
                                 assert public.p.x == int(params['Qx'], 16)
                                 assert public.p.y == int(params['Qy'], 16)

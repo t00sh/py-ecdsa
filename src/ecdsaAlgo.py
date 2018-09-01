@@ -15,8 +15,12 @@ class ECDSAPrivateKey:
         if d <= 0 or d >= params.order:
             raise Exception("Invalid private key !")
 
-        self.params = params
-        self.d = d
+        self.__params = params
+        self.__d = d
+
+    @property
+    def params(self):
+        return self.__params
 
     def sign(self, m, k=None):
         """ Sign a message using ECDSA algorithm """
@@ -34,7 +38,7 @@ class ECDSAPrivateKey:
             x = p.x % order
             h = hashMessage(hash_fct, m, order)
 
-            y = k_inv * ((h + self.d * x) % order)
+            y = k_inv * ((h + self.__d * x) % order)
             y %= order
 
         return ECDSASignature(self.params, x, y)

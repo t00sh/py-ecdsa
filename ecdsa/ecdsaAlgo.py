@@ -1,5 +1,5 @@
-from ecc import ECC, ECCPoint, ECCInfinitePoint
-from utils import *
+from .ecc import ECC, ECCPoint, ECCInfinitePoint
+from .utils import *
 import hashlib
 
 class ECDSAPrivateKey:

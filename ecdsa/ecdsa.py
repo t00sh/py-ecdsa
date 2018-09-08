@@ -1,6 +1,3 @@
-from ecdsaAlgo import *
-from nistCurves import *
-
 """
 Main file of the library.
 """

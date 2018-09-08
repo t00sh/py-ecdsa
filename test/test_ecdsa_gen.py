@@ -1,8 +1,9 @@
 import re
+import os
 import sys
 import binascii
 
-sys.path.insert(0, './src/')
+sys.path.insert(0, os.path.abspath('.'))
 
 from ecdsa import *
 

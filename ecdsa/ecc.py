@@ -1,4 +1,4 @@
-from utils import invMod
+from .utils import invMod
 
 class ECCPoint:
     """

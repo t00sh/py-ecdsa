@@ -1,4 +1,4 @@
-from ecdsa import *
+from .ecdsaAlgo import *
 
 class ECDSAParamsP192(ECDSAParams):
     """
